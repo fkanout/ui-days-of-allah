@@ -17,13 +17,12 @@ export default function Home(data) {
     <div class="w-full h-full bg-black mt-16">
       {data.hits.map(({ _source }) => (
         <div class="flex mb-5 align-middle rounded-xl pl-2 pr-2">
-          <button class="flex-shrink-0 rounded-full h-10 w-10 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white" onClick={() => {
+          <button class="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white" onClick={() => {
             setUrl(_source.audioURL)
             setPlayingTitle(_source.title)
           }}>
 
-            <span>▶️</span>
-
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAAjElEQVRIie3UsQ3CMBBGYZtNkNgEJEbJCOzHHCAowgIg6o+CiigoWD6jFHmlJfvd6c5/SguzBTtccEOHHC04++SITaRgjCcOWLUSxHUzIajv5gdBXTcFArhjP/bO19WDwpquOef18LB+GyaIEjxSSl3RjTkMuemaNvtooVFxCq96INh6x3WvRVwv/I0X45q9tZAyZ4sAAAAASUVORK5CYII=" />
           </button>
           <img class="self-center w-12 h-12 rounded mr-3" src={_source.videoThumbnail} />
           <div class="self-center">
