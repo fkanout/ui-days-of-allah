@@ -1,65 +1,75 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
+const humanizeDuration = require("humanize-duration");
 
-export default function Home() {
+import { useState } from 'react';
+
+const { Client } = require('@elastic/elasticsearch')
+
+export default function Home(data) {
+  const [url, setUrl] = useState('');
+  const [playingTitle, setPlayingTitle] = useState('');
+  const audioPlayerHeader = () => (<div class="font-bold text-xl mb-2" > {playingTitle}</div>)
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <div class="w-full h-full bg-black mt-16">
+      {data.hits.map(({ _source }) => (
+        <div class="flex mb-5 align-middle rounded-xl pl-2 pr-2">
+          <button class="flex-shrink-0 rounded-full h-10 w-10 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white" onClick={() => {
+            setUrl(_source.audioURL)
+            setPlayingTitle(_source.title)
+          }}>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+            <span>▶️</span>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+          </button>
+          <img class="self-center w-12 h-12 rounded mr-3" src={_source.videoThumbnail} />
+          <div class="self-center">
+            <div class=" text-l text-gray-300">
+              {_source.title}
+            </div>
+            <div class="text-xs text-gray-400">
+              {_source.channelName}
+            </div>
+            <div class="text-xs text-gray-500">
+              {(humanizeDuration(_source.lengthSeconds * 1000, { maxDecimalPoints: 2 }))}
+            </div>
+          </div>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
         </div>
-      </main>
+      ))}
+      <div class="absolute bottom-0 sticky">
+        <AudioPlayer
+          header={audioPlayerHeader()}
+          src={url}
+          onPlay={e => console.log("onPlay")}
+        // other props here
+        />
+      </div>
+    </div >
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
   )
+}
+
+export async function getStaticProps(context) {
+  const client = new Client({ node: 'https://avnadmin:vlqckywpcje4qj56@es-2a982b4f-fkanout-fa50.aivencloud.com:19906' })
+  const data = await client.search({
+    index: "days_of_allah",
+    body: {
+      size: 50,
+      "query": {
+        "match_all": {
+        }
+      }
+    }
+  })
+
+  console.log(data.body.hits);
+
+  return {
+    props: data.body.hits, // will be passed to the page component as props
+  }
 }
