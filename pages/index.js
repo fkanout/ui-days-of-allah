@@ -2,6 +2,8 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
+import ytpl from 'ytpl';
+
 const humanizeDuration = require("humanize-duration");
 
 import { useState } from 'react';
@@ -66,8 +68,10 @@ export async function getStaticProps(context) {
     }
   })
 
-  console.log(data.body.hits);
+  // console.log(data.body.hits);
+  const playlist = await ytpl("https://www.youtube.com/c/ThebestislamicBlogspot", { limit: 100000 });
 
+  console.log(playlist);
   return {
     props: data.body.hits, // will be passed to the page component as props
   }
