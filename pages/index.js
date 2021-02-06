@@ -2,22 +2,27 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
-import ytpl from 'ytpl';
+import ytdl from 'ytdl-core'
+function getFirefoxUserAgent() {
+  let date = new Date()
+  let version = ((date.getFullYear() - 2018) * 4 + Math.floor(date.getMonth() / 4) + 58) + ".0"
+  return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version} Gecko/20100101 Firefox/${version}`
+}
 
 const humanizeDuration = require("humanize-duration");
 
 import { useState } from 'react';
 
-const { Client } = require('@elastic/elasticsearch')
+// const { Client } = require('@elastic/elasticsearch')
 
-export default function Home(data) {
+const Home = (data) => {
   const [url, setUrl] = useState('');
   const [playingTitle, setPlayingTitle] = useState('');
   const audioPlayerHeader = () => (<div class="font-bold text-xl mb-2" > {playingTitle}</div>)
 
   return (
     <div class="w-full h-full bg-black mt-16">
-      {data.hits.map(({ _source }) => (
+      {data.map(({ _source }) => (
         <div class="flex mb-5 align-middle rounded-xl pl-2 pr-2">
           <button class="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white" onClick={() => {
             setUrl(_source.audioURL)
@@ -54,25 +59,41 @@ export default function Home(data) {
 
   )
 }
+export default function Channels(data) {
+  return (
+    <div class="w-full h-full grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7 gap-4 bg-white mt-16">
+      {data.channels.map(channel => {
+        return (
+          <div key={channel.channelId}>
+            <div>
+              {channel.channelName}
+            </div>
+            <img src={"data:image/jpg;base64, " + channel.avatar} />
+
+          </div>
+
+        )
+      })}
+    </div>
+  )
+}
 
 export async function getStaticProps(context) {
-  const client = new Client({ node: 'https://avnadmin:vlqckywpcje4qj56@es-2a982b4f-fkanout-fa50.aivencloud.com:19906' })
-  const data = await client.search({
-    index: "days_of_allah",
-    body: {
-      size: 50,
-      "query": {
-        "match_all": {
-        }
-      }
+
+  const DEFAULT_HEADERS = {
+    // "cookie": "GPS=1; YSC=iHdvZ0PIsb0; VISITOR_INFO1_LIVE=zWvytXlrc1s; PREF=f4=4000000&tz=Europe.Paris",
+    "User-Agent": getFirefoxUserAgent(),
+    "Accept-Language": "en-US,en;q=0.5"
+  }
+
+  const { videoDetails, formats } = await ytdl.getInfo("_6yNpGqPKd8", {
+    requestOptions: {
+      headers: DEFAULT_HEADERS
     }
   })
+  console.log(videoDetails)
 
-  // console.log(data.body.hits);
-  const playlist = await ytpl("https://www.youtube.com/c/ThebestislamicBlogspot", { limit: 100000 });
-
-  console.log(playlist);
   return {
-    props: data.body.hits, // will be passed to the page component as props
+    props: { channels: [] }, // will be passed to the page component as props
   }
 }
