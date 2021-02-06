@@ -22,6 +22,7 @@ const Podcasts = (data) => {
           <button className="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white"
             onClick={async () => {
               const urlHost = `https://days-of-allah.herokuapp.com/audio/${podcast[3]}`
+
               const { data: url } = await axios(urlHost);
 
               setUrl(url)
@@ -85,7 +86,7 @@ export async function getStaticProps(context) {
     locateFile: file => `./node_modules/sql.js/dist/sql-wasm.wasm`
   });
 
-  const dataPromise = fetch("http://localhost:3000/db/days_of_allah.db").then(res => res.arrayBuffer());
+  const dataPromise = fetch("https://days-of-allah.herokuapp.com/public/days_of_allah.db").then(res => res.arrayBuffer());
   const [buf] = await Promise.all([dataPromise])
 
   const db = new SQL.Database(new Uint8Array(buf));
