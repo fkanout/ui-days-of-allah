@@ -102,7 +102,7 @@ export async function getStaticPaths() {
 export async function getStaticProps(context) {
   const SQL = await initSqlJs();
   console.log(process.env.NODE_ENV)
-  let dbURL = "https://days-of-allah.herokuapp.com/public/days_of_allah.db"
+  let dbURL = "https://brave-newton-2b639a.netlify.app/db/days_of_allah.db"
   if (process.env.NODE_ENV === "development") dbURL = "http://localhost:3000/db/days_of_allah.db"
 
   const dataPromise = fetch(dbURL).then(res => res.arrayBuffer());
