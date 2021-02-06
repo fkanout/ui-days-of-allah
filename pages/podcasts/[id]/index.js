@@ -6,9 +6,23 @@ import axios from 'axios'
 const humanizeDuration = require("humanize-duration");
 const initSqlJs = require('sql.js');
 
+const chunk = (chunkSize, array) => {
+  return [].concat.apply([],
+    array.map(function (elem, i) {
+      return i % chunkSize ? [] : [array.slice(i, i + chunkSize)];
+    })
+  );
+};
+const getResults = (podcasts, page) => {
+  const pages = chunk(20, podcasts)
+  console.log(page)
+  return pages[page]
+}
 
 const Podcasts = (data) => {
 
+  const [page, setPage] = useState(0)
+  const [results, setResults] = useState(getResults(data.podcasts.values, page))
   const [url, setUrl] = useState('');
   const [playingTitle, setPlayingTitle] = useState('');
   const audioPlayerHeader = () => (<div className="font-bold text-xl mb-2" > {playingTitle}</div>)
@@ -17,7 +31,7 @@ const Podcasts = (data) => {
   }
   return (
     <div className="w-full h-full bg-black mt-16">
-      {data.podcasts.values.map((podcast) => (
+      {results.map((podcast) => (
         <div key={podcast[3]} className="flex mb-5 align-middle rounded-xl pl-2 pr-2">
           <button className="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white"
             onClick={async () => {
@@ -47,6 +61,14 @@ const Podcasts = (data) => {
 
         </div>
       ))}
+      <div onClick={() => {
+        setResults([...results, ...getResults(data.podcasts.values, page + 1)])
+        setPage(page + 1)
+      }} className={"mb-10 mt-10 "}>
+        <h1 className={"text-red-400 justify-center text-2xl"}>Load more</h1>
+
+      </div>
+
       <div className="absolute bottom-0 sticky">
         <AudioPlayer
           autoPlay
@@ -78,19 +100,16 @@ export async function getStaticPaths() {
 
 
 export async function getStaticProps(context) {
+  const SQL = await initSqlJs();
+  console.log(process.env.NODE_ENV)
+  let dbURL = "https://days-of-allah.herokuapp.com/public/days_of_allah.db"
+  if (process.env.NODE_ENV === "development") dbURL = "http://localhost:3000/db/days_of_allah.db"
 
-
-
-
-  const SQL = await initSqlJs({
-    locateFile: file => `./node_modules/sql.js/dist/sql-wasm.wasm`
-  });
-
-  const dataPromise = fetch("https://days-of-allah.herokuapp.com/public/days_of_allah.db").then(res => res.arrayBuffer());
+  const dataPromise = fetch(dbURL).then(res => res.arrayBuffer());
   const [buf] = await Promise.all([dataPromise])
 
   const db = new SQL.Database(new Uint8Array(buf));
-  const podcasts = db.exec(`SELECT * FROM videos WHERE (channelId)  = "${context.params.id}" LIMIT 100`)[0];
+  const podcasts = db.exec(`SELECT * FROM videos WHERE (channelId)  = "${context.params.id}" ORDER BY date(publishDate) DESC`)[0];
 
   return {
     props: { podcasts }, // will be passed to the page component as props
