@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Head from 'next/head'
 import channels from '../../api/channels'
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
@@ -22,6 +23,7 @@ const getResults = (podcasts, page) => {
 const Podcasts = (data) => {
 
   const [page, setPage] = useState(0)
+  const [title, setTitle] = useState("أيام الله")
   const [results, setResults] = useState(getResults(data.podcasts.values, page))
   const [url, setUrl] = useState('');
   const [playingTitle, setPlayingTitle] = useState('');
@@ -31,16 +33,21 @@ const Podcasts = (data) => {
   }
   return (
     <div className="w-full h-full bg-black mt-16">
+      <Head>
+        <title>{title}</title>
+        {/* <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />   */}
+      </Head>
       {results.map((podcast) => (
         <div key={podcast[3]} className="flex mb-5 align-middle rounded-xl pl-2 pr-2">
           <button className="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white"
             onClick={async () => {
-              const urlHost = `http://35.180.23.50:3000/audio/${podcast[3]}`
+              const urlHost = `https://days-of-allah.herokuapp.com/audio/${podcast[3]}`
 
 
               const { data: audio } = await axios(urlHost);
 
               setUrl(audio.url)
+              setTitle(podcast[0])
               setPlayingTitle(podcast[0])
             }}>
 
