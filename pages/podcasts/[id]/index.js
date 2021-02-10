@@ -41,7 +41,7 @@ const Podcasts = (data) => {
         <div key={podcast[3]} className="flex mb-5 align-middle rounded-xl pl-2 pr-2">
           <button className="flex-shrink-0 rounded-full h-12 w-12 mr-4 ml-4 self-center flex items-center justify-center text-green-500 focus:outline-none transition-colors duration-150 border border-green-500 focus:shadow-outline hover:bg-green-500 hover:text-white"
             onClick={async () => {
-              const urlHost = `https://doa-864220538.eu-west-3.elb.amazonaws.com/audio/${podcast[3]}`
+              const urlHost = `https://days-of-allah.herokuapp.com/audio/${podcast[3]}`
 
 
               const { data: audio } = await axios(urlHost);
